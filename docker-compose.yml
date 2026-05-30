@@ -4,7 +4,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: ${CORERADIO_CONTAINER_NAME:-coreradio-index}
+    container_name: ${CORERADIO_CONTAINER_NAME:-core-arr}
     init: true
     env_file:
       - stack.env

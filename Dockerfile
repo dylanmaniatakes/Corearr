@@ -10,6 +10,11 @@ RUN npm run build
 
 FROM node:24-alpine AS runtime
 
+LABEL org.opencontainers.image.title="Corearr" \
+      org.opencontainers.image.description="Core Radio indexer and Lidarr bridge" \
+      org.opencontainers.image.source="https://github.com/DylanManiatakes/Corearr" \
+      org.opencontainers.image.url="https://github.com/DylanManiatakes/Corearr"
+
 ENV NODE_ENV=production \
     PORT=8080 \
     DATA_DIR=/data \

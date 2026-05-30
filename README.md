@@ -20,7 +20,7 @@ You can deploy this directly from a Git/custom repo in Portainer. Docker Hub is 
 
 1. Push this repo to a Git server Portainer can reach.
 2. In Portainer, go to **Stacks** > **Add stack** > **Repository**.
-3. Set the repository URL, branch, and compose path to `docker-compose.yml`.
+3. Set the repository URL to `https://github.com/DylanManiatakes/Corearr.git`, choose your branch, and set the compose path to `docker-compose.yml`.
 4. Add the environment variables from `stack.env`, or use Portainer's **Load variables from .env file** option with `stack.env`.
 5. Deploy the stack.
 
@@ -77,7 +77,19 @@ The indexer must be the torrent/Torznab type, not Newznab/Usenet. If Lidarr logs
 
 Lidarr caches Torznab capabilities for several days. If you change this app and Lidarr keeps using `t=search` instead of `t=music`, restart Lidarr or change the indexer URL to `http://HOST:8080/api/lidarr` to force a fresh capability cache entry. `/api/lidarr` omits the generic search capability so Lidarr prefers music/audio search parameters.
 
+CoreRadio album and single entries are marked in search titles as `[Album]` or `[Single]`. The Torznab feed also includes `tag=coreradio-album` / `tag=coreradio-single` and `releaseType=album` / `releaseType=single` metadata. Lidarr's built-in Indexer Flags are hardcoded to torrent flags such as Freeleech, Internal, and Scene, so arbitrary Album/Single flags are not displayed in that exact UI field.
+
 When Lidarr grabs a release, it downloads a tiny CoreRadio `.torrent` from the Torznab indexer and sends it to this app's qBittorrent-compatible API. The app then downloads the real Core Radio archive, extracts it under `/downloads`, and reports the completed folder back to Lidarr as a stopped, seed-complete torrent so Lidarr can import it into its root folder. If Lidarr's **Remove Completed** option is enabled for this download client, Lidarr will call back into this app to remove the completed download data after import.
+
+Lidarr normally refreshes monitored downloads on a scheduled one-minute task. To make CoreRadio downloads update/import sooner, set these optional variables in `stack.env`:
+
+```dotenv
+LIDARR_URL=http://lidarr:8686
+LIDARR_API_KEY=your-lidarr-api-key
+LIDARR_REFRESH_DEBOUNCE_MS=10000
+```
+
+When these are set, this app posts Lidarr's `RefreshMonitoredDownloads` command on qBittorrent-style queued/progress/completed events. The debounce prevents one command per progress tick while still nudging Lidarr quickly when a CoreRadio download finishes.
 
 For Dockerized Lidarr, make sure this app's `/downloads` path is visible to Lidarr as the same path, or add a Lidarr remote path mapping:
 

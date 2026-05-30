@@ -1,8 +1,17 @@
 {
   "name": "coreradio-index",
   "version": "0.1.0",
+  "description": "Corearr indexes Core Radio releases and exposes Lidarr-friendly Torznab/qBittorrent endpoints.",
   "private": true,
   "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/DylanManiatakes/Corearr.git"
+  },
+  "homepage": "https://github.com/DylanManiatakes/Corearr",
+  "bugs": {
+    "url": "https://github.com/DylanManiatakes/Corearr/issues"
+  },
   "scripts": {
     "dev": "concurrently \"tsx watch server/index.ts\" \"vite --host 0.0.0.0\"",
     "build": "tsc -p tsconfig.server.json && vite build",

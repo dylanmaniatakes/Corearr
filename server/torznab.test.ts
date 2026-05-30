@@ -89,10 +89,12 @@ describe("Torznab RSS", () => {
     const response = await request(app).get("/api/torznab/api?t=search&q=Dagger%20Breaks%20Window");
 
     expect(response.status).toBe(200);
-    expect(response.text).toContain("Car Underwater - Dagger Breaks Window [FLAC]");
+    expect(response.text).toContain("Car Underwater - Dagger Breaks Window [FLAC] [Album]");
     expect(response.text).toContain('type="application/x-bittorrent"');
     expect(response.text).toContain('name="infohash"');
     expect(response.text).toMatch(/name="size" value="[1-9]\d{7,}"/);
+    expect(response.text).toContain('name="tag" value="coreradio-album"');
+    expect(response.text).toContain('name="releaseType" value="album"');
   });
 
   it("keeps get links on the mounted indexer endpoint", async () => {
@@ -125,5 +127,42 @@ describe("Torznab RSS", () => {
     expect(response.status).toBe(200);
     expect(response.text).toContain("/api/lidarr/api?t=get");
     expect(response.text).not.toContain("/api/torznab/api?t=get");
+  });
+
+  it("marks singles distinctly from albums in titles and Torznab metadata", async () => {
+    const store = {
+      searchReleases: () => [
+        {
+          ...release,
+          title: "Car Underwater - Dagger Breaks Window [single] (2026)",
+          name: "Dagger Breaks Window",
+          kind: "single",
+          sourceUrl: "https://coreradio.online/singles/55325-car-underwater-dagger-breaks-window-single-2026",
+          mirrors: [
+            {
+              id: "mp3",
+              label: "MP3",
+              format: "mp3",
+              quality: "DOWNLOAD MP3",
+              url: "https://s.coreradio.online/example",
+              kind: "core-hash",
+              priority: 10,
+              safeForAutoDownload: true
+            }
+          ]
+        }
+      ],
+      listReleases: () => [],
+      getRelease: () => undefined,
+      upsertReleases: vi.fn()
+    } as unknown as JsonStore;
+    const app = express().use("/api/lidarr", torznabRouter(store, {} as DownloadManager));
+
+    const response = await request(app).get("/api/lidarr/api?t=music&q=Dagger%20Breaks%20Window");
+
+    expect(response.status).toBe(200);
+    expect(response.text).toContain("Car Underwater - Dagger Breaks Window [MP3 320] [Single]");
+    expect(response.text).toContain('name="tag" value="coreradio-single"');
+    expect(response.text).toContain('name="releaseType" value="single"');
   });
 });

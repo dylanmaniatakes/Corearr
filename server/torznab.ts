@@ -146,13 +146,15 @@ function formatItemXml(release: Release, format: DownloadFormat, baseUrl: string
   const size = estimateSize(release, format);
   const title = titleWithQuality(release, format);
   const infoHash = coreTorrentHash(release.id, format);
+  const releaseType = releaseTypeLabel(release);
+  const releaseTag = `coreradio-${release.kind}`;
 
   return `<item>
   <title>${xml(title)}</title>
   <guid isPermaLink="false">${xml(`coreradio-${release.id}-${format}`)}</guid>
   <link>${xml(downloadUrl)}</link>
   <comments>${xml(release.sourceUrl)}</comments>
-  <description>${xml(`${release.artist ?? "Core Radio"} - ${release.name ?? release.title} ${format.toUpperCase()}`)}</description>
+  <description>${xml(`${release.artist ?? "Core Radio"} - ${release.name ?? release.title} ${format.toUpperCase()} ${releaseType}`)}</description>
   <pubDate>${new Date(release.updatedAt).toUTCString()}</pubDate>
   <category>${category}</category>
   <size>${size}</size>
@@ -161,6 +163,8 @@ function formatItemXml(release: Release, format: DownloadFormat, baseUrl: string
   <newznab:attr name="size" value="${size}" />
   <newznab:attr name="artist" value="${xml(release.artist ?? "")}" />
   <newznab:attr name="album" value="${xml(release.name ?? release.title)}" />
+  <newznab:attr name="tag" value="${releaseTag}" />
+  <newznab:attr name="releaseType" value="${release.kind}" />
   <torznab:attr name="category" value="${category}" />
   <torznab:attr name="size" value="${size}" />
   <torznab:attr name="infohash" value="${infoHash}" />
@@ -169,6 +173,8 @@ function formatItemXml(release: Release, format: DownloadFormat, baseUrl: string
   <torznab:attr name="grabs" value="0" />
   <torznab:attr name="artist" value="${xml(release.artist ?? "")}" />
   <torznab:attr name="album" value="${xml(release.name ?? release.title)}" />
+  <torznab:attr name="tag" value="${releaseTag}" />
+  <torznab:attr name="releaseType" value="${release.kind}" />
 </item>`;
 }
 
@@ -269,7 +275,7 @@ function availableFormats(release: Release): DownloadFormat[] {
 function titleWithQuality(release: Release, format: DownloadFormat): string {
   const quality = format === "flac" ? "FLAC" : format === "mp3" ? "MP3 320" : format.toUpperCase();
   const baseTitle = release.artist && release.name ? `${release.artist} - ${cleanAlbumName(release.name)}` : cleanReleaseTitle(release.title);
-  return `${baseTitle} [${quality}]`;
+  return `${baseTitle} [${quality}] [${releaseTypeLabel(release)}]`;
 }
 
 function estimateSize(release: Release, format: DownloadFormat): number {
@@ -292,6 +298,12 @@ function cleanReleaseTitle(value: string): string {
     .replace(/\s*\[(single|ep)\]\s*/gi, " ")
     .replace(/\s+/g, " ")
     .trim();
+}
+
+function releaseTypeLabel(release: Release): string {
+  if (release.kind === "album") return "Album";
+  if (release.kind === "single") return "Single";
+  return "Release";
 }
 
 function parseBoundedInt(value: unknown, fallback: number, min: number, max: number): number {

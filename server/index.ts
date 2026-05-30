@@ -7,6 +7,7 @@ import { z } from "zod";
 import { config } from "./config.js";
 import { crawlCatalog, crawlSearch } from "./coreradio.js";
 import { DownloadManager } from "./downloads.js";
+import { LidarrRefresher } from "./lidarr.js";
 import { qbittorrentRouter } from "./qbittorrent.js";
 import { JsonStore } from "./store.js";
 import { torznabRouter } from "./torznab.js";
@@ -15,7 +16,7 @@ import type { CatalogRefreshOptions, DownloadFormat, Release, ReleaseKind } from
 const log = pino({ level: process.env.LOG_LEVEL ?? "info" });
 const app = express();
 const store = new JsonStore();
-const downloads = new DownloadManager(store);
+const downloads = new DownloadManager(store, new LidarrRefresher());
 
 const refreshSchema = z.object({
   pages: z.number().int().min(1).max(config.maxRefreshPages).optional(),

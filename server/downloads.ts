@@ -11,6 +11,7 @@ import { config } from "./config.js";
 import { decodeCoreHash } from "./coreradio.js";
 import type { DownloadClientInfo, DownloadFormat, DownloadJob, DownloadMirror, Release } from "./types.js";
 import type { JsonStore } from "./store.js";
+import type { DownloadUpdateNotifier, LidarrRefreshReason } from "./lidarr.js";
 
 interface DownloadResult {
   outputPath: string;
@@ -29,7 +30,10 @@ const execFileAsync = promisify(execFile);
 export class DownloadManager {
   private readonly running = new Set<string>();
 
-  constructor(private readonly store: JsonStore) {}
+  constructor(
+    private readonly store: JsonStore,
+    private readonly notifier?: DownloadUpdateNotifier
+  ) {}
 
   queue(release: Release, format: DownloadFormat, mirrorId?: string, downloadClient?: DownloadClientInfo): DownloadJob {
     const now = new Date().toISOString();
@@ -48,6 +52,7 @@ export class DownloadManager {
     };
 
     this.store.upsertJob(job);
+    this.notifier?.requestRefresh(job, "queued");
     void this.run(job.id);
     return job;
   }
@@ -185,6 +190,7 @@ export class DownloadManager {
       updatedAt: new Date().toISOString()
     };
     this.store.upsertJob(next);
+    this.notifier?.requestRefresh(next, notifyReason(next));
     return next;
   }
 
@@ -195,6 +201,12 @@ export class DownloadManager {
       completedAt: new Date().toISOString()
     });
   }
+}
+
+function notifyReason(job: DownloadJob): LidarrRefreshReason {
+  if (job.status === "completed") return "completed";
+  if (job.status === "failed") return "failed";
+  return "progress";
 }
 
 function selectMirrors(release: Release, format: DownloadFormat, mirrorId?: string): DownloadMirror[] {

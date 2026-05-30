@@ -39,6 +39,8 @@ For local Docker Compose runs that should use every value in `stack.env`, run:
 docker compose --env-file stack.env up -d --build
 ```
 
+Production image builds skip `npm test` by default so Portainer deploys are not blocked by test-runner differences on the Docker host. Run `npm test` locally before pushing changes, or set `COREARR_RUN_TESTS=true` if you explicitly want tests to run inside `docker build`.
+
 Use absolute host paths for `COREARR_DATA_PATH` and `COREARR_DOWNLOADS_PATH` on the Docker host where Portainer runs. If Lidarr is Dockerized, make `COREARR_DOWNLOADS_PATH` point at a folder Lidarr can also see, or add a Lidarr remote path mapping for `/downloads/`. Legacy `CORERADIO_*` stack variables are still accepted as compose fallbacks, but new installs should use `COREARR_*`.
 
 After deploy, Portainer should show the container as healthy once `GET /api/health` responds.

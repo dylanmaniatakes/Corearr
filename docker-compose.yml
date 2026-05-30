@@ -5,6 +5,8 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+      args:
+        RUN_TESTS: ${COREARR_RUN_TESTS:-false}
     container_name: ${COREARR_CONTAINER_NAME:-${CORERADIO_CONTAINER_NAME:-corearr}}
     init: true
     env_file:

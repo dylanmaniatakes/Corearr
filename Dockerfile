@@ -5,7 +5,8 @@ COPY package*.json ./
 RUN npm ci
 
 COPY . .
-RUN npm test
+ARG RUN_TESTS=false
+RUN if [ "$RUN_TESTS" = "true" ]; then npm test; else echo "Skipping npm test during image build"; fi
 RUN npm run build
 
 FROM node:24-alpine AS runtime

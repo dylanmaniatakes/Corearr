@@ -2,7 +2,6 @@ name: ${COREARR_STACK_NAME:-${CORERADIO_STACK_NAME:-corearr}}
 
 services:
   corearr:
-    image: ${COREARR_IMAGE:-${CORERADIO_IMAGE:-corearr:local}}
     build:
       context: .
       dockerfile: Dockerfile

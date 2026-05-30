@@ -16,7 +16,7 @@ Downloads land in `./downloads`. Catalog and job state live in `./data/db.json`.
 
 ## Portainer
 
-You can deploy this directly from a Git/custom repo in Portainer. Docker Hub is not required because Portainer builds the image from the repo's `Dockerfile`.
+You can deploy this directly from a Git/custom repo in Portainer. Docker Hub is not required because Portainer builds the image from the repo's `Dockerfile`; the compose file intentionally does not set an `image:` name so Portainer will not try to pull `corearr` from a registry.
 
 1. Push this repo to a Git server Portainer can reach.
 2. In Portainer, go to **Stacks** > **Add stack** > **Repository**.

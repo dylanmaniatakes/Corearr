@@ -4,5 +4,7 @@ dist
 data
 downloads
 .git
+.env
+stack.env
 .DS_Store
 npm-debug.log

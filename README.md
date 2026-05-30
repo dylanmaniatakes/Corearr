@@ -14,6 +14,35 @@ Open [http://localhost:8080](http://localhost:8080).
 
 Downloads land in `./downloads`. Catalog and job state live in `./data/db.json`.
 
+## Portainer
+
+You can deploy this directly from a Git/custom repo in Portainer. Docker Hub is not required because Portainer builds the image from the repo's `Dockerfile`.
+
+1. Push this repo to a Git server Portainer can reach.
+2. In Portainer, go to **Stacks** > **Add stack** > **Repository**.
+3. Set the repository URL, branch, and compose path to `docker-compose.yml`.
+4. Add the environment variables from `stack.env`, or use Portainer's **Load variables from .env file** option with `stack.env`.
+5. Deploy the stack.
+
+The compose file includes `env_file: stack.env`, which is the Portainer-supported way to pass all stack variables into the container on Docker Standalone. Update these values for your host:
+
+```dotenv
+CORERADIO_PORT=8080
+PUBLIC_BASE_URL=http://YOUR_SERVER_IP:8080
+CORERADIO_DATA_PATH=/opt/coreradio-index/data
+CORERADIO_DOWNLOADS_PATH=/downloads/coreradio
+```
+
+For local Docker Compose runs that should use every value in `stack.env`, run:
+
+```bash
+docker compose --env-file stack.env up -d --build
+```
+
+Use absolute host paths for `CORERADIO_DATA_PATH` and `CORERADIO_DOWNLOADS_PATH` on the Docker host where Portainer runs. If Lidarr is Dockerized, make `CORERADIO_DOWNLOADS_PATH` point at a folder Lidarr can also see, or add a Lidarr remote path mapping for `/downloads/`.
+
+After deploy, Portainer should show the container as healthy once `GET /api/health` responds.
+
 ## Local Development
 
 ```bash

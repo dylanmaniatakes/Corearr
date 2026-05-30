@@ -71,12 +71,13 @@ Add the app twice in Lidarr:
 1. Add an indexer as Generic Torznab with URL `http://HOST:8080/api/lidarr`.
 2. Add a download client as qBittorrent with host `HOST`, port `8080`, URL Base `/api/qbittorrent`, category `lidarr`, and any username/password.
 3. Make sure Completed Download Handling is enabled in Lidarr.
+4. In the qBittorrent download client settings inside Lidarr, enable **Remove Completed** if you want Lidarr to move/import and then tell this app to delete the CoreRadio download folder/archive.
 
 The indexer must be the torrent/Torznab type, not Newznab/Usenet. If Lidarr logs `does not contain application/x-nzb, found application/x-bittorrent, did you intend to add a Torznab indexer?`, delete that indexer and add it again as Generic Torznab.
 
 Lidarr caches Torznab capabilities for several days. If you change this app and Lidarr keeps using `t=search` instead of `t=music`, restart Lidarr or change the indexer URL to `http://HOST:8080/api/lidarr` to force a fresh capability cache entry. `/api/lidarr` omits the generic search capability so Lidarr prefers music/audio search parameters.
 
-When Lidarr grabs a release, it downloads a tiny CoreRadio `.torrent` from the Torznab indexer and sends it to this app's qBittorrent-compatible API. The app then downloads the real Core Radio archive, extracts it under `/downloads`, and reports the completed folder back to Lidarr so Lidarr can import it into its root folder.
+When Lidarr grabs a release, it downloads a tiny CoreRadio `.torrent` from the Torznab indexer and sends it to this app's qBittorrent-compatible API. The app then downloads the real Core Radio archive, extracts it under `/downloads`, and reports the completed folder back to Lidarr as a stopped, seed-complete torrent so Lidarr can import it into its root folder. If Lidarr's **Remove Completed** option is enabled for this download client, Lidarr will call back into this app to remove the completed download data after import.
 
 For Dockerized Lidarr, make sure this app's `/downloads` path is visible to Lidarr as the same path, or add a Lidarr remote path mapping:
 

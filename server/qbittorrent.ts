@@ -40,7 +40,16 @@ export function qbittorrentRouter(store: JsonStore, downloads: DownloadManager):
       save_path: withTrailingSlash(config.downloadDir),
       temp_path: withTrailingSlash(path.join(config.downloadDir, ".incomplete")),
       create_subfolder_enabled: true,
-      auto_tmm_enabled: false
+      auto_tmm_enabled: false,
+      max_ratio_enabled: true,
+      max_ratio: 0,
+      max_seeding_time_enabled: false,
+      max_seeding_time: 0,
+      max_inactive_seeding_time_enabled: false,
+      max_inactive_seeding_time: 0,
+      max_ratio_act: 0,
+      queueing_enabled: true,
+      dht: true
     });
   });
 
@@ -170,27 +179,36 @@ async function torrentInfo(job: DownloadJob): Promise<Record<string, unknown>> {
   const progress = job.status === "completed" ? 1 : Math.max(0, Math.min(1, (job.progress.percent ?? 0) / 100));
   const savePath = savePathFor(job);
   const contentPath = job.outputPath ?? path.join(savePath, job.downloadClient?.name ?? job.releaseTitle);
+  const isCompleted = job.status === "completed";
+  const completedSize = size || job.progress.bytesTotal || job.progress.bytesReceived || 1;
+  const downloaded = isCompleted ? completedSize : job.progress.bytesReceived;
+  const lastActivity = job.completedAt ?? job.updatedAt;
   return {
     added_on: unix(job.createdAt),
-    amount_left: Math.max(0, (job.progress.bytesTotal ?? size) - job.progress.bytesReceived),
+    amount_left: isCompleted ? 0 : Math.max(0, (job.progress.bytesTotal ?? size) - job.progress.bytesReceived),
     category: job.downloadClient?.category ?? "",
-    completed: job.status === "completed" ? size : job.progress.bytesReceived,
+    completed: isCompleted ? completedSize : job.progress.bytesReceived,
     completion_on: job.completedAt ? unix(job.completedAt) : -1,
     content_path: contentPath,
     dlspeed: Math.round(job.progress.speedBytesPerSecond ?? 0),
-    downloaded: job.progress.bytesReceived,
+    downloaded,
     eta: ["completed", "failed"].includes(job.status) ? 0 : 3600,
     hash: job.downloadClient?.hash ?? "",
+    inactive_seeding_time_limit: 0,
+    last_activity: unix(lastActivity),
     name: job.downloadClient?.name ?? job.releaseTitle,
     num_complete: 1,
     num_incomplete: 0,
     progress,
     ratio: 0,
+    ratio_limit: 0,
     save_path: savePath,
-    size: size || job.progress.bytesTotal || 1,
+    seeding_time: isCompleted && job.completedAt ? Math.max(0, Math.floor((Date.now() - new Date(job.completedAt).getTime()) / 1000)) : 0,
+    seeding_time_limit: 0,
+    size: completedSize,
     state: qbitState(job.status),
     tags: "coreradio",
-    total_size: size || job.progress.bytesTotal || 1,
+    total_size: completedSize,
     tracker: "coreradio-index",
     uploaded: 0,
     upspeed: 0
@@ -198,7 +216,7 @@ async function torrentInfo(job: DownloadJob): Promise<Record<string, unknown>> {
 }
 
 function qbitState(status: JobStatus): string {
-  if (status === "completed") return "uploading";
+  if (status === "completed") return "pausedUP";
   if (status === "failed") return "error";
   if (status === "queued" || status === "resolving") return "queuedDL";
   if (status === "canceled") return "pausedDL";

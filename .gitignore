@@ -1,0 +1,8 @@
+node_modules/
+dist/
+client/dist/
+data/
+downloads/
+.env
+.DS_Store
+npm-debug.log*

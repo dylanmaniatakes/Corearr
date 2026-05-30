@@ -1,0 +1,17 @@
+services:
+  coreradio-index:
+    build: .
+    container_name: coreradio-index
+    ports:
+      - "8080:8080"
+    environment:
+      PORT: "8080"
+      DATA_DIR: /data
+      DOWNLOAD_DIR: /downloads
+      DEFAULT_REFRESH_PAGES: "2"
+      CRAWLER_CONCURRENCY: "3"
+      CRAWLER_DELAY_MS: "350"
+    volumes:
+      - ./data:/data
+      - ./downloads:/downloads
+    restart: unless-stopped

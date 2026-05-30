@@ -1,5 +1,5 @@
 {
-  "name": "coreradio-index",
+  "name": "corearr",
   "version": "0.1.0",
   "description": "Corearr indexes Core Radio releases and exposes Lidarr-friendly Torznab/qBittorrent endpoints.",
   "private": true,

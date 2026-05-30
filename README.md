@@ -27,10 +27,10 @@ You can deploy this directly from a Git/custom repo in Portainer. Docker Hub is 
 The compose file includes `env_file: stack.env`, which is the Portainer-supported way to pass all stack variables into the container on Docker Standalone. Update these values for your host:
 
 ```dotenv
-CORERADIO_PORT=8080
+COREARR_PORT=8080
 PUBLIC_BASE_URL=http://YOUR_SERVER_IP:8080
-CORERADIO_DATA_PATH=/opt/coreradio-index/data
-CORERADIO_DOWNLOADS_PATH=/downloads/coreradio
+COREARR_DATA_PATH=/opt/corearr/data
+COREARR_DOWNLOADS_PATH=/downloads/corearr
 ```
 
 For local Docker Compose runs that should use every value in `stack.env`, run:
@@ -39,7 +39,7 @@ For local Docker Compose runs that should use every value in `stack.env`, run:
 docker compose --env-file stack.env up -d --build
 ```
 
-Use absolute host paths for `CORERADIO_DATA_PATH` and `CORERADIO_DOWNLOADS_PATH` on the Docker host where Portainer runs. If Lidarr is Dockerized, make `CORERADIO_DOWNLOADS_PATH` point at a folder Lidarr can also see, or add a Lidarr remote path mapping for `/downloads/`.
+Use absolute host paths for `COREARR_DATA_PATH` and `COREARR_DOWNLOADS_PATH` on the Docker host where Portainer runs. If Lidarr is Dockerized, make `COREARR_DOWNLOADS_PATH` point at a folder Lidarr can also see, or add a Lidarr remote path mapping for `/downloads/`. Legacy `CORERADIO_*` stack variables are still accepted as compose fallbacks, but new installs should use `COREARR_*`.
 
 After deploy, Portainer should show the container as healthy once `GET /api/health` responds.
 

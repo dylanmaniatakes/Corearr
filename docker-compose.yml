@@ -1,22 +1,24 @@
+name: ${COREARR_STACK_NAME:-${CORERADIO_STACK_NAME:-corearr}}
+
 services:
-  coreradio-index:
-    image: ${CORERADIO_IMAGE:-coreradio-index:local}
+  corearr:
+    image: ${COREARR_IMAGE:-${CORERADIO_IMAGE:-corearr:local}}
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: ${CORERADIO_CONTAINER_NAME:-coreradio-index}
+    container_name: ${COREARR_CONTAINER_NAME:-${CORERADIO_CONTAINER_NAME:-corearr}}
     init: true
     env_file:
       - stack.env
     ports:
-      - "${CORERADIO_PORT:-8080}:8080"
+      - "${COREARR_PORT:-${CORERADIO_PORT:-8080}}:8080"
     environment:
       PORT: "8080"
       DATA_DIR: /data
       DOWNLOAD_DIR: /downloads
     volumes:
-      - ${CORERADIO_DATA_PATH:-./data}:/data
-      - ${CORERADIO_DOWNLOADS_PATH:-./downloads}:/downloads
+      - ${COREARR_DATA_PATH:-${CORERADIO_DATA_PATH:-./data}}:/data
+      - ${COREARR_DOWNLOADS_PATH:-${CORERADIO_DOWNLOADS_PATH:-./downloads}}:/downloads
     healthcheck:
       test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:8080/api/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
       interval: 30s
